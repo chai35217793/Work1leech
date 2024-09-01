@@ -3,5 +3,5 @@ if [[ -n $RCLONE_CONFIG ]]; then
  echo -e "$RCLONE_CONFIG" > /app/rclone.conf
 fi
 chmod +x extract
+python3 app.py &
 python3 -m tobrot
-
