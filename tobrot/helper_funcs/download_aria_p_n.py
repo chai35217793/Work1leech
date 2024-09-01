@@ -68,9 +68,6 @@ async def aria_start():
     aria2_daemon_start_cmd.append("aria2c")
     aria2_daemon_start_cmd.append("--allow-overwrite=true")
     aria2_daemon_start_cmd.append("--daemon=true")
-    # aria2_daemon_start_cmd.append(f"--dir={DOWNLOAD_LOCATION}")
-    # TODO: this does not work, need to investigate this.
-    # but for now, https://t.me/TrollVoiceBot?start=858
     aria2_daemon_start_cmd.append("--enable-rpc")
     aria2_daemon_start_cmd.append("--follow-torrent=mem")
     aria2_daemon_start_cmd.append("--max-connection-per-server=10")
@@ -105,10 +102,6 @@ async def aria_start():
 
 def add_magnet(aria_instance, magnetic_link, c_file_name):
     options = None
-    # if c_file_name is not None:
-    #     options = {
-    #         "dir": c_file_name
-    #     }
     try:
         download = aria_instance.add_magnet(magnetic_link, options=options)
     except Exception as e:
@@ -129,7 +122,6 @@ def add_torrent(aria_instance, torrent_file_path):
             + " \nsomething wrongings when trying to add <u>TORRENT</u> file",
         )
     if os.path.exists(torrent_file_path):
-        # Add Torrent Into Queue
         try:
             download = aria_instance.add_torrent(
                 torrent_file_path, uris=None, options=None, position=None
@@ -147,14 +139,6 @@ def add_torrent(aria_instance, torrent_file_path):
 
 def add_url(aria_instance, text_url, c_file_name):
     options = None
-    # if c_file_name is not None:
-    #     options = {
-    #         "dir": c_file_name
-    #     }
-    #
-    # or "cloud.mail.ru" in text_url \  doesnt work.
-    # or "github.com" in text_url \   doesnt work.
-    #
     if (
         "zippyshare.com" in text_url
         or "osdn.net" in text_url
@@ -169,7 +153,6 @@ def add_url(aria_instance, text_url, c_file_name):
             LOGGER.info(f"{text_url}: {e}")
     else:
         uris = [text_url]
-    # Add URL Into Queue
     try:
         download = aria_instance.add_uris(uris, options=options)
     except Exception as e:
@@ -205,14 +188,11 @@ async def call_apropriate_function(
         if not sagtus:
             return sagtus, err_message
         LOGGER.info(err_message)
-        # https://stackoverflow.com/a/58213653/4723940
         await check_progress_for_dl(
             aria_instance, err_message, sent_message_to_update_tg_p, None
         )
         if incoming_link.startswith("magnet:"):
-            #
             err_message = await check_metadata(aria_instance, err_message)
-            #
             await asyncio.sleep(1)
             if err_message is not None:
                 await check_progress_for_dl(
@@ -240,7 +220,6 @@ async def call_apropriate_function(
         check_if_file = await create_archive(to_upload_file)
         if check_if_file is not None:
             to_upload_file = check_if_file
-    #
     if is_unzip:
         try:
             check_ifi_file = get_base_name(to_upload_file)
@@ -270,7 +249,7 @@ async def call_apropriate_function(
     if cstom_file_name:
         os.rename(to_upload_file, cstom_file_name)
         to_upload_file = cstom_file_name
-    #
+
     response = {}
     user_id = user_message.from_user.id
     if com_g:
@@ -353,12 +332,10 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
                     await event.reply(f"`{msg}`")
                     return
                 await asyncio.sleep(EDIT_SLEEP_TIME_OUT)
-                # await check_progress_for_dl(aria2, gid, event, previous_message)
             else:
                 LOGGER.info(
                     f"Downloaded Successfully: `{file.name} ({file.total_length_string()})` 🤒"
                 )
-                # await asyncio.sleep(EDIT_SLEEP_TIME_OUT)
                 if not file.is_metadata:
                     await event.edit(
                         f"Downloaded Successfully: `{file.name} ({file.total_length_string()})` 🤒"
@@ -373,7 +350,6 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
         except MessageNotModified as ep:
             LOGGER.info(ep)
             await asyncio.sleep(EDIT_SLEEP_TIME_OUT)
-            # await check_progress_for_dl(aria2, gid, event, previous_message)
             return
         except FloodWait as e:
             LOGGER.info(e)
@@ -393,14 +369,10 @@ async def check_progress_for_dl(aria2, gid, event, previous_message):
                 return
 
 
-# https://github.com/jaskaranSM/UniBorg/blob/6d35cf452bce1204613929d4da7530058785b6b1/stdplugins/aria.py#L136-L164
-
-
 async def check_metadata(aria2, gid):
     file = aria2.get_download(gid)
     LOGGER.info(file)
     if not file.followed_by_ids:
-        # https://t.me/c/1213160642/496
         return None
     new_gid = file.followed_by_ids[0]
     LOGGER.info("Changing GID " + gid + " to " + new_gid)
