@@ -45,7 +45,7 @@ async def incoming_message_f(client, message):
     user_command = message.command[0]
     g_id = message.from_user.id
     credit = await message.reply_text(
-        f"🧲 Leeching for you <a href='tg://user?id={g_id}'>🤕</a>", parse_mode="markdown"
+        f"🧲 Leeching for you <a href='tg://user?id={g_id}'>🤕</a>", parse_mode="MarkDownV2"
     )
     # get link from the incoming message
     i_m_sefg = await message.reply_text("processing...", quote=True)
